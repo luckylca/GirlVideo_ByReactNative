@@ -1,25 +1,60 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import HomeScreen from '../screens/HomeScreen';
-// 假设你还创建了一个 DetailsScreen
-// import DetailsScreen from '../screens/DetailsScreen';
+import { createMaterialBottomTabNavigator } from 'react-native-paper/react-navigation';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-// 1. 定义路由参数列表（TS 的精髓）
+import HomeScreen from '../screens/HomeScreen';
+import SettingsScreen from '../screens/SettingsScreen';
+
+// 1. 定义路由参数列表
 export type RootStackParamList = {
-    Home: undefined;      // Home 页面不需要参数
+    MainTabs: undefined;
+};
+
+// 2. 定义 Tab 参数列表
+export type TabParamList = {
+    Home: undefined;
+    Settings: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+const Tab = createMaterialBottomTabNavigator<TabParamList>();
+
+// 3. 创建 Tab 导航器
+const TabNavigator = () => {
+    return (
+        <Tab.Navigator>
+            <Tab.Screen
+                name="Home"
+                component={HomeScreen}
+                options={{
+                    tabBarLabel: '首页',
+                    tabBarIcon: ({ color }) => (
+                        <MaterialCommunityIcons name="home" color={color} size={26} />
+                    ),
+                }}
+            />
+            <Tab.Screen
+                name="Settings"
+                component={SettingsScreen}
+                options={{
+                    tabBarLabel: '设置',
+                    tabBarIcon: ({ color }) => (
+                        <MaterialCommunityIcons name="cog" color={color} size={26} />
+                    ),
+                }}
+            />
+        </Tab.Navigator>
+    );
+};
 
 export const RootNavigator = () => {
     return (
-        <Stack.Navigator initialRouteName="Home">
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen
-                name="Home"
-                component={HomeScreen}
-                options={{ title: '首页' }}
+                name="MainTabs"
+                component={TabNavigator}
             />
-            {/* <Stack.Screen name="Details" component={DetailsScreen} /> */}
         </Stack.Navigator>
     );
 };

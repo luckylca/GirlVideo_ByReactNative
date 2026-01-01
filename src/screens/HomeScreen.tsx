@@ -1,5 +1,6 @@
 import React = require("react");
-import { ViewStyle, TextStyle, ImageStyle, StyleSheet, Button, View, Text } from 'react-native';
+import { ViewStyle, TextStyle, ImageStyle, StyleSheet, View } from 'react-native';
+import { Button, Text } from 'react-native-paper';
 
 interface Styles {
   container: ViewStyle; // 容器样式
@@ -9,9 +10,9 @@ const HomeScreen = ({navigation}:any) => {
     return (
         <View style={styles.container}>
             <Text style={styles.card}>Home Screen</Text>
-            <Button
-                title="Go to Details"
-            />
+            <Button mode="contained" onPress={() => navigation.navigate('Settings')}>
+                Go to Details
+            </Button>
             <Text>Welcome to the Home Screen!</Text>
         </View>
     );

@@ -3,12 +3,14 @@ import { create } from 'zustand';
 
 interface UserState {
     username: string;
+    password?: string;
     isLoggedIn: boolean;
-    login: (name: string) => void;
+    login: (name: string, pass: string) => void;
 }
 
 export const useUserStore = create<UserState>((set) => ({
     username: '',
+    password: '',
     isLoggedIn: false,
-    login: (name) => set({ username: name, isLoggedIn: true }),
+    login: (name: string, pass: string) => set({ username: name, password: pass, isLoggedIn: true }),
 }));

@@ -1,7 +1,8 @@
 import React = require("react");
 import { ViewStyle, TextStyle, ImageStyle, StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
-import { Button, Text, Avatar, Card, Switch, Modal, Portal,TextInput,IconButton, HelperText  } from 'react-native-paper';
-
+import { Button, Text, Avatar, Card, Switch, Modal, Portal, TextInput, IconButton, HelperText,Drawer } from 'react-native-paper';
+import { useUserStore } from '../store/useUserStore';
+import { DrawerLayout } from 'react-native-gesture-handler';
 interface Styles {
     container: ViewStyle; // 容器样式
     card: ViewStyle; // 卡片容器样式
@@ -20,12 +21,21 @@ interface Styles {
 }
 
 const SettingsScreen = ({ navigation }: any) => {
+    const userStore = useUserStore();
+
+
     const [isSwitchOn, setIsSwitchOn] = React.useState(false);
     const onToggleSwitch = () => setIsSwitchOn(!isSwitchOn);
 
     const [visible, setVisible] = React.useState(false);
-    const showModal = () => setVisible(true);
-    const hideModal = () => setVisible(false);
+    const showModal = () => {
+        setVisible(true);
+        setUserName('');
+        setPassword('');
+    };
+    const hideModal = () => {
+        setVisible(false);
+    };
 
     const [userName, setUserName] = React.useState('');
     const [password, setPassword] = React.useState('');
@@ -33,8 +43,54 @@ const SettingsScreen = ({ navigation }: any) => {
     const [isUserNameEmpty, setIsUserNameEmpty] = React.useState(false);
     const [isPasswordEmpty, setIsPasswordEmpty] = React.useState(false);
 
+    const [isSecure, setIsSecure] = React.useState(true);
+
+    const [isLoading, setIsLoading] = React.useState(false);
+
+    const login = () => {
+        setIsLoading(true);
+        if (userName.trim() === '') {
+            setIsUserNameEmpty(true);
+            setIsLoading(false);
+            return;
+        } else {
+            setIsUserNameEmpty(false);
+        }
+        if (password.trim() === '') {
+            setIsPasswordEmpty(true);
+            setIsLoading(false);
+            return;
+        } else {
+            setIsPasswordEmpty(false);
+        }
+        userStore.login(userName, password);
+        hideModal();
+        setIsLoading(false);
+    }
+
+    const drawerRef = React.useRef<DrawerLayout>(null);
+    const openDrawer = () => {
+        drawerRef.current?.openDrawer();
+    };
+    const closeDrawer = () => {
+        drawerRef.current?.closeDrawer();
+    };
+    const renderDrawerContent = () => (
+        <View style={{ flex: 1, backgroundColor: '#fff', padding: 20 }}>
+            <Text style={{ fontSize: 20, marginBottom: 20 }}>数据源选择</Text>
+            <Button onPress={closeDrawer} mode="contained">关闭抽屉</Button>
+        </View>
+    );
+
+
     return (
-        <ScrollView contentContainerStyle={styles.container}>
+        <DrawerLayout
+            ref={drawerRef}
+            drawerWidth={200}
+            drawerPosition="right"
+            renderNavigationView={renderDrawerContent}
+        >
+            <ScrollView contentContainerStyle={styles.container}>
             <Portal>
                 <Modal
                     visible={visible}
@@ -42,35 +98,40 @@ const SettingsScreen = ({ navigation }: any) => {
                     contentContainerStyle={styles.modalContainer}
                 >
                     <TouchableOpacity>
-                        <IconButton size={40} icon="close-circle" iconColor="red" style={styles.closeButton}/>
+                        <IconButton size={40} icon="close-circle" iconColor="red" style={styles.closeButton} />
                     </TouchableOpacity>
-                    <Avatar.Icon size={100} icon="folder" style={styles.avatar}/>
+                    <Avatar.Icon size={100} icon="folder" style={styles.avatar} />
                     <TextInput
                         label="账号"
                         mode="outlined"
                         style={styles.input}
                         placeholder="推荐使用QQ号注册"
                         onChangeText={setUserName}
-                        />
+                        value={userName}
+                    />
                     <HelperText type="error" visible={isUserNameEmpty}>
                         用户名不能为空
                     </HelperText>
                     <TextInput
                         label="密码"
                         mode="outlined"
-                        secureTextEntry
-                        style={styles.passwordInput}/>
+                        placeholder="请输入密码"
+                        onChangeText={setPassword}
+                        value={password}
+                        secureTextEntry={isSecure}
+                        right={<TextInput.Icon icon={isSecure ? "eye-off" : "eye"} onPress={() => setIsSecure(!isSecure)} />}
+                        style={styles.passwordInput} />
                     <HelperText type="error" visible={isPasswordEmpty}>
                         密码不能为空
                     </HelperText>
-                    <Button style={styles.loginButton} onPress={hideModal} mode="elevated">
+                    <Button style={styles.loginButton} onPress={login} loading={isLoading} mode="elevated">
                         登录
                     </Button>
                     <Text style={styles.hintText}>若没有账号则会自动注册</Text>
                 </Modal>
             </Portal>
             <TouchableOpacity style={styles.loginContainer} activeOpacity={0.8} onPress={showModal}>
-                <Avatar.Icon size={100} icon="folder" style={styles.avatar}/>
+                <Avatar.Icon size={100} icon="folder" style={styles.avatar} />
                 <Card mode="elevated" style={styles.loginCard}>
                     <View style={styles.centeredRow}>
                         <Text style={styles.cardContent}>请登录</Text>
@@ -83,7 +144,7 @@ const SettingsScreen = ({ navigation }: any) => {
                     <Switch value={isSwitchOn} onValueChange={onToggleSwitch} />
                 </Card.Content>
             </Card>
-            <Card mode="elevated" style={styles.card}>
+            <Card mode="elevated" style={styles.card} onPress={openDrawer}>
                 <Card.Content>
                     <Text style={styles.cardContent}>数据源选择</Text>
                 </Card.Content>
@@ -108,7 +169,8 @@ const SettingsScreen = ({ navigation }: any) => {
                     <Text style={styles.cardContent}>关于APP</Text>
                 </Card.Content>
             </Card>
-        </ScrollView>
+            </ScrollView>
+        </DrawerLayout>
     );
 }
 

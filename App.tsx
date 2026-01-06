@@ -4,7 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { RootNavigator } from './src/navigation';
 import { PaperProvider, MD3LightTheme } from 'react-native-paper';
-
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 const theme = {
 	...MD3LightTheme,
 	colors: {
@@ -20,9 +20,11 @@ function App() {
 		<SafeAreaProvider>
 			<StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
 			<PaperProvider theme={theme}>
-				<NavigationContainer>
-					<RootNavigator />
-				</NavigationContainer>
+				<GestureHandlerRootView>
+					<NavigationContainer>
+						<RootNavigator />
+					</NavigationContainer>
+				</GestureHandlerRootView>
 			</PaperProvider>
 		</SafeAreaProvider>
 	);

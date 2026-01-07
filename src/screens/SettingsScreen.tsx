@@ -1,8 +1,14 @@
+/* eslint-disable react-native/no-inline-styles */
 import React = require("react");
-import { ViewStyle, TextStyle, ImageStyle, StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
-import { Button, Text, Avatar, Card, Switch, Modal, Portal, TextInput, IconButton, HelperText,Drawer } from 'react-native-paper';
+import { ViewStyle, TextStyle, StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
+import { Button, Text, Avatar, Card, Switch, Modal, Portal, TextInput, IconButton, HelperText, Dialog } from 'react-native-paper';
 import { useUserStore } from '../store/useUserStore';
 import { DrawerLayout } from 'react-native-gesture-handler';
+import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
+import Reanimated, {
+    SharedValue,
+    useAnimatedStyle,
+} from 'react-native-reanimated';
 interface Styles {
     container: ViewStyle; // 容器样式
     card: ViewStyle; // 卡片容器样式
@@ -20,22 +26,44 @@ interface Styles {
     hintText: TextStyle;
 }
 
-const SettingsScreen = ({ navigation }: any) => {
+const RightAction = ({ progress: _progress, drag, onDelete }: { progress: SharedValue<number>, drag: SharedValue<number>, onDelete: () => void }) => {
+    const styleAnimation = useAnimatedStyle(() => {
+        return {
+            transform: [{ translateX: drag.value + 80 }],
+        };
+    });
+
+    return (
+        <Reanimated.View style={[styleAnimation, { width: 80, height: '100%', backgroundColor: 'red', justifyContent: 'center', alignItems: 'center' }]}>
+            <TouchableOpacity onPress={onDelete}>
+                <View style={{ width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}>
+                    <Text style={{ color: 'white' }}>删除</Text>
+                </View>
+            </TouchableOpacity>
+        </Reanimated.View>
+    );
+}
+
+const SettingsScreen = ({ navigation: _navigation }: any) => {
     const userStore = useUserStore();
 
 
     const [isSwitchOn, setIsSwitchOn] = React.useState(false);
     const onToggleSwitch = () => setIsSwitchOn(!isSwitchOn);
 
-    const [visible, setVisible] = React.useState(false);
+    const [modalVisible, setModalVisible] = React.useState(false);
     const showModal = () => {
-        setVisible(true);
+        setModalVisible(true);
         setUserName('');
         setPassword('');
     };
     const hideModal = () => {
-        setVisible(false);
+        setModalVisible(false);
     };
+
+    const [dialogVisible, setDialogVisible] = React.useState(false);
+    const showDialog = () => setDialogVisible(true);
+    const hideDialog = () => setDialogVisible(false);
 
     const [userName, setUserName] = React.useState('');
     const [password, setPassword] = React.useState('');
@@ -47,6 +75,26 @@ const SettingsScreen = ({ navigation }: any) => {
 
     const [isLoading, setIsLoading] = React.useState(false);
 
+    const [videoChannels, setVideoChannels] = React.useState([
+        { id: '1', name: '频道1', status: '在线', url: 'https://example.com/channel1' },
+        { id: '2', name: '频道2', status: '离线', url: 'https://example.com/channel2' },
+        { id: '3', name: '频道3', status: '维护中', url: 'https://example.com/channel3' },
+        { id: '4', name: '频道4', status: '在线', url: 'https://example.com/channel4' },
+    ]);
+
+    const swipeableRefs = React.useRef<Map<string, InstanceType<typeof ReanimatedSwipeable>>>(new Map());
+
+    const [deleteItem, setDeleteItem] = React.useState<string>('');
+
+    const handleDeleteItem = (id: string) => {
+        showDialog();
+        setDeleteItem(id);
+    };
+
+    const confirmDeleteItem = () => {
+        setVideoChannels(current => current.filter(item => item.id !== deleteItem));
+        hideDialog();
+    }
     const login = () => {
         setIsLoading(true);
         if (userName.trim() === '') {
@@ -70,19 +118,53 @@ const SettingsScreen = ({ navigation }: any) => {
 
     const drawerRef = React.useRef<DrawerLayout>(null);
     const openDrawer = () => {
+        swipeableRefs.current.forEach(ref => ref.close());
         drawerRef.current?.openDrawer();
     };
     const closeDrawer = () => {
         drawerRef.current?.closeDrawer();
+
     };
     const renderDrawerContent = () => (
-        <View style={{ flex: 1, backgroundColor: '#fff', padding: 20 }}>
-            <Text style={{ fontSize: 20, marginBottom: 20 }}>数据源选择</Text>
-            <Button onPress={closeDrawer} mode="contained">关闭抽屉</Button>
-        </View>
+        //这个是抽屉组件的内容
+        <>
+            <View style={{ flex: 1, backgroundColor: '#fff', padding: 20 }}>
+                <Text style={{ fontSize: 20, marginBottom: 20 }}>数据源选择</Text>
+                {videoChannels.map((item) => (
+                    <ReanimatedSwipeable
+                        key={item.id} // 🔥 必须有唯一的 key，就像 Vue 的 :key
+                        friction={2}
+                        ref={(ref) => {
+                            if (ref) {
+                                swipeableRefs.current.set(item.id, ref);
+                            } else {
+                                swipeableRefs.current.delete(item.id);
+                            }
+                        }}
+                        rightThreshold={40}
+                        renderRightActions={(progress, drag) => (
+                            <RightAction
+                                progress={progress}
+                                drag={drag}
+                                onDelete={() => handleDeleteItem(item.id)}
+                            />
+                        )}
+                    >
+                        {/* 列表项内容 */}
+                        <View style={{
+                            padding: 20,
+                            borderBottomWidth: 1,
+                            borderColor: '#eee',
+                            backgroundColor: '#fff' // 必须有背景色，否则滑动的底层会透出来
+                        }}>
+                            <Text style={{ fontSize: 16 }}>{item.name}</Text>
+                            <Text style={{ fontSize: 12, color: 'gray' }}>{item.status}</Text>
+                        </View>
+                    </ReanimatedSwipeable>
+                ))}
+            </View>
+        </>
     );
-
-
     return (
         <DrawerLayout
             ref={drawerRef}
@@ -91,84 +173,94 @@ const SettingsScreen = ({ navigation }: any) => {
             renderNavigationView={renderDrawerContent}
         >
             <ScrollView contentContainerStyle={styles.container}>
-            <Portal>
-                <Modal
-                    visible={visible}
-                    onDismiss={hideModal}
-                    contentContainerStyle={styles.modalContainer}
-                >
-                    <TouchableOpacity>
-                        <IconButton size={40} icon="close-circle" iconColor="red" style={styles.closeButton} />
-                    </TouchableOpacity>
+                <Portal>
+                    <Dialog visible={dialogVisible} onDismiss={hideDialog}>
+                        <Dialog.Title>警告</Dialog.Title>
+                        <Dialog.Content>
+                            <Text variant="bodyMedium">确认删除{videoChannels[deleteItem-1].name}吗？</Text>
+                        </Dialog.Content>
+                        <Dialog.Actions>
+                            <Button onPress={() => { hideDialog(); swipeableRefs.current.forEach(ref => ref.close()); }}>取消</Button>
+                            <Button onPress={confirmDeleteItem}>确认</Button>
+                        </Dialog.Actions>
+                    </Dialog>
+                    <Modal
+                        visible={modalVisible}
+                        onDismiss={hideModal}
+                        contentContainerStyle={styles.modalContainer}
+                    >
+                        <TouchableOpacity>
+                            <IconButton size={40} icon="close-circle" iconColor="red" style={styles.closeButton} />
+                        </TouchableOpacity>
+                        <Avatar.Icon size={100} icon="folder" style={styles.avatar} />
+                        <TextInput
+                            label="账号"
+                            mode="outlined"
+                            style={styles.input}
+                            placeholder="推荐使用QQ号注册"
+                            onChangeText={setUserName}
+                            value={userName}
+                        />
+                        <HelperText type="error" visible={isUserNameEmpty}>
+                            用户名不能为空
+                        </HelperText>
+                        <TextInput
+                            label="密码"
+                            mode="outlined"
+                            placeholder="请输入密码"
+                            onChangeText={setPassword}
+                            value={password}
+                            secureTextEntry={isSecure}
+                            right={<TextInput.Icon icon={isSecure ? "eye-off" : "eye"} onPress={() => setIsSecure(!isSecure)} />}
+                            style={styles.passwordInput} />
+                        <HelperText type="error" visible={isPasswordEmpty}>
+                            密码不能为空
+                        </HelperText>
+                        <Button style={styles.loginButton} onPress={login} loading={isLoading} mode="elevated">
+                            登录
+                        </Button>
+                        <Text style={styles.hintText}>若没有账号则会自动注册</Text>
+                    </Modal>
+                </Portal>
+                <TouchableOpacity style={styles.loginContainer} activeOpacity={0.8} onPress={showModal}>
                     <Avatar.Icon size={100} icon="folder" style={styles.avatar} />
-                    <TextInput
-                        label="账号"
-                        mode="outlined"
-                        style={styles.input}
-                        placeholder="推荐使用QQ号注册"
-                        onChangeText={setUserName}
-                        value={userName}
-                    />
-                    <HelperText type="error" visible={isUserNameEmpty}>
-                        用户名不能为空
-                    </HelperText>
-                    <TextInput
-                        label="密码"
-                        mode="outlined"
-                        placeholder="请输入密码"
-                        onChangeText={setPassword}
-                        value={password}
-                        secureTextEntry={isSecure}
-                        right={<TextInput.Icon icon={isSecure ? "eye-off" : "eye"} onPress={() => setIsSecure(!isSecure)} />}
-                        style={styles.passwordInput} />
-                    <HelperText type="error" visible={isPasswordEmpty}>
-                        密码不能为空
-                    </HelperText>
-                    <Button style={styles.loginButton} onPress={login} loading={isLoading} mode="elevated">
-                        登录
-                    </Button>
-                    <Text style={styles.hintText}>若没有账号则会自动注册</Text>
-                </Modal>
-            </Portal>
-            <TouchableOpacity style={styles.loginContainer} activeOpacity={0.8} onPress={showModal}>
-                <Avatar.Icon size={100} icon="folder" style={styles.avatar} />
-                <Card mode="elevated" style={styles.loginCard}>
-                    <View style={styles.centeredRow}>
-                        <Text style={styles.cardContent}>请登录</Text>
-                    </View>
+                    <Card mode="elevated" style={styles.loginCard}>
+                        <View style={styles.centeredRow}>
+                            <Text style={styles.cardContent}>请登录</Text>
+                        </View>
+                    </Card>
+                </TouchableOpacity>
+                <Card mode="elevated" style={styles.card}>
+                    <Card.Content style={styles.rowBetween}>
+                        <Text style={styles.cardContent}>自动播放</Text>
+                        <Switch value={isSwitchOn} onValueChange={onToggleSwitch} />
+                    </Card.Content>
                 </Card>
-            </TouchableOpacity>
-            <Card mode="elevated" style={styles.card}>
-                <Card.Content style={styles.rowBetween}>
-                    <Text style={styles.cardContent}>自动播放</Text>
-                    <Switch value={isSwitchOn} onValueChange={onToggleSwitch} />
-                </Card.Content>
-            </Card>
-            <Card mode="elevated" style={styles.card} onPress={openDrawer}>
-                <Card.Content>
-                    <Text style={styles.cardContent}>数据源选择</Text>
-                </Card.Content>
-            </Card>
-            <Card mode="elevated" style={styles.card}>
-                <Card.Content>
-                    <Text style={styles.cardContent}>收藏列表</Text>
-                </Card.Content>
-            </Card>
-            <Card mode="elevated" style={styles.card}>
-                <Card.Content>
-                    <Text style={styles.cardContent}>下载列表</Text>
-                </Card.Content>
-            </Card>
-            <Card mode="elevated" style={styles.card}>
-                <Card.Content>
-                    <Text style={styles.cardContent}>导入视频</Text>
-                </Card.Content>
-            </Card>
-            <Card mode="elevated" style={styles.card}>
-                <Card.Content>
-                    <Text style={styles.cardContent}>关于APP</Text>
-                </Card.Content>
-            </Card>
+                <Card mode="elevated" style={styles.card} onPress={openDrawer}>
+                    <Card.Content>
+                        <Text style={styles.cardContent}>数据源选择</Text>
+                    </Card.Content>
+                </Card>
+                <Card mode="elevated" style={styles.card}>
+                    <Card.Content>
+                        <Text style={styles.cardContent}>收藏列表</Text>
+                    </Card.Content>
+                </Card>
+                <Card mode="elevated" style={styles.card}>
+                    <Card.Content>
+                        <Text style={styles.cardContent}>下载列表</Text>
+                    </Card.Content>
+                </Card>
+                <Card mode="elevated" style={styles.card}>
+                    <Card.Content>
+                        <Text style={styles.cardContent}>导入视频</Text>
+                    </Card.Content>
+                </Card>
+                <Card mode="elevated" style={styles.card}>
+                    <Card.Content>
+                        <Text style={styles.cardContent}>关于APP</Text>
+                    </Card.Content>
+                </Card>
             </ScrollView>
         </DrawerLayout>
     );
@@ -232,7 +324,7 @@ const styles = StyleSheet.create<Styles>({
         width: 200,
     },
     passwordInput: {
-        marginTop: 10,
+        marginTop: 0,
         width: 200,
     },
     loginButton: {
@@ -244,4 +336,5 @@ const styles = StyleSheet.create<Styles>({
         marginBottom: 10,
     },
 });
+
 export default SettingsScreen;

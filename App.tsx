@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import * as React from 'react';
 import { StatusBar, useColorScheme } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
@@ -20,7 +21,7 @@ function App() {
 		<SafeAreaProvider>
 			<StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
 			<PaperProvider theme={theme}>
-				<GestureHandlerRootView>
+				<GestureHandlerRootView style={{ flex: 1 }}>
 					<NavigationContainer>
 						<RootNavigator />
 					</NavigationContainer>

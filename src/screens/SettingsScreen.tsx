@@ -5,6 +5,8 @@ import { Button, Text, Avatar, Card, Switch, Modal, Portal, TextInput, IconButto
 import { useUserStore } from '../store/useUserStore';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
+import { BackHandler } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import Reanimated, {
     SharedValue,
     useAnimatedStyle,
@@ -51,6 +53,8 @@ const SettingsScreen = ({ navigation: _navigation }: any) => {
     const [isSwitchOn, setIsSwitchOn] = React.useState(false);
     const onToggleSwitch = () => setIsSwitchOn(!isSwitchOn);
 
+    const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
+
     const [modalVisible, setModalVisible] = React.useState(false);
     const showModal = () => {
         setModalVisible(true);
@@ -84,7 +88,7 @@ const SettingsScreen = ({ navigation: _navigation }: any) => {
 
     const swipeableRefs = React.useRef<Map<string, InstanceType<typeof ReanimatedSwipeable>>>(new Map());
 
-    const [deleteItem, setDeleteItem] = React.useState<string>('');
+    const [deleteItem, setDeleteItem] = React.useState<string | null>(null);
 
     const handleDeleteItem = (id: string) => {
         showDialog();
@@ -123,8 +127,21 @@ const SettingsScreen = ({ navigation: _navigation }: any) => {
     };
     const closeDrawer = () => {
         drawerRef.current?.closeDrawer();
-
     };
+    useFocusEffect(
+        React.useCallback(() => {
+            const onBackPress = () => {
+                if (isDrawerOpen) {
+                    closeDrawer();
+                    return true; // 拦截，不退出页面
+                }
+                return false; // 不拦截，执行正常返回
+            };
+
+            const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+            return () => subscription.remove();
+        }, [isDrawerOpen])
+    );
     const renderDrawerContent = () => (
         //这个是抽屉组件的内容
         <>
@@ -171,13 +188,15 @@ const SettingsScreen = ({ navigation: _navigation }: any) => {
             drawerWidth={200}
             drawerPosition="right"
             renderNavigationView={renderDrawerContent}
+            onDrawerOpen={() => setIsDrawerOpen(true)}
+            onDrawerClose={() => setIsDrawerOpen(false)}
         >
             <ScrollView contentContainerStyle={styles.container}>
                 <Portal>
                     <Dialog visible={dialogVisible} onDismiss={hideDialog}>
                         <Dialog.Title>警告</Dialog.Title>
                         <Dialog.Content>
-                            <Text variant="bodyMedium">确认删除{videoChannels[deleteItem-1].name}吗？</Text>
+                            <Text variant="bodyMedium">确认删除{videoChannels.find(item => item.id === deleteItem)?.name}吗？</Text>
                         </Dialog.Content>
                         <Dialog.Actions>
                             <Button onPress={() => { hideDialog(); swipeableRefs.current.forEach(ref => ref.close()); }}>取消</Button>

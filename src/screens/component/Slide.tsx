@@ -21,6 +21,9 @@ import {
     Image,
     ImageStyle
 } from 'react-native';
+import Video from 'react-native-video';
+import Slider from '@react-native-community/slider';
+import { useNavigation } from "@react-navigation/native";
 
 interface Styles {
     container: ViewStyle;
@@ -33,10 +36,16 @@ const VIRTUAL_NUM = 5;
 
 const NAV_BAR_HEIGHT = 80; // 假设导航栏高度为44，可以根据实际情况调整
 
-const VideoLayout = React.memo(({ item }: { item: any }) => {
+const VideoLayout = React.memo(({ item,paused,repeat }: { item: any, paused: boolean,repeat: boolean }) => {
     return (
         <View style={[styles.layout, { backgroundColor: '#1a1a1a' }]}>
-            {/* 这里写视频的界面 */}
+            <Video 
+                source={{ uri: item.uri }} 
+                style={{ width: WINDOW_WIDTH, height: WINDOW_HEIGHT - NAV_BAR_HEIGHT }} 
+                resizeMode="contain"
+                paused={paused}
+                repeat={repeat}
+            />
         </View>
     );
 });
@@ -45,14 +54,14 @@ const ImageLayout = React.memo(({ item }: { item: any }) => {
     return (
         <View style={[styles.layout, { backgroundColor: '#333' }]}>
             {/* 这里写图片的界面 */}
-            <Image source={{ uri: item.uri }} style={{ width: WINDOW_WIDTH, height: WINDOW_HEIGHT - NAV_BAR_HEIGHT }} resizeMode="contain" />
+            <Image source={{ uri: item.uri }} style={{ width: WINDOW_WIDTH, height: '100%' }} resizeMode="contain" />
         </View>
     );
 });
 
-const SlideItem = React.memo(({ index, translateY, item, dataType }: { index: number, translateY: any, item: any, dataType: string }) => {
-    const insets = useSafeAreaInsets();
-    const ITEM_HEIGHT = WINDOW_HEIGHT - NAV_BAR_HEIGHT - insets.bottom;
+const SlideItem = React.memo(({ index, translateY, item, dataType,ITEM_HEIGHT,videoConfig }: { index: number, translateY: any, item: any, dataType: string,ITEM_HEIGHT: number ,videoConfig: any }) => {
+    // const insets = useSafeAreaInsets();
+    // const ITEM_HEIGHT = WINDOW_HEIGHT - NAV_BAR_HEIGHT - insets.bottom;
     const animatedStyle = useAnimatedStyle(() => {
         // 计算当前项相对于视口中心的偏移量
         const offset = (translateY.value as number) + index * ITEM_HEIGHT;
@@ -82,14 +91,20 @@ const SlideItem = React.memo(({ index, translateY, item, dataType }: { index: nu
     });
     return (
         <Animated.View style={[styles.itemContainer, { height: ITEM_HEIGHT }, animatedStyle]}>
-            {dataType === 'video' && <VideoLayout item={item} />}
+            {dataType === 'video' && <VideoLayout item={item} paused={videoConfig?.paused} repeat={videoConfig?.repeat} />}
             {dataType === 'image' && <ImageLayout item={item} />}
         </Animated.View>
     );
 })
 
 const Slide = ({ data, dataType }: { data: any[], dataType: string }) => {
+    const navigation = useNavigation<any>();
     const [currentIndex, setCurrentIndex] = React.useState(0);
+
+    const translateY = useSharedValue(0);
+    const contextY = useSharedValue(0);
+    const translateX = useSharedValue(0);
+    const contextX = useSharedValue(0);
 
     const insets = useSafeAreaInsets();
     const ITEM_HEIGHT = WINDOW_HEIGHT - NAV_BAR_HEIGHT - insets.bottom;
@@ -118,16 +133,17 @@ const Slide = ({ data, dataType }: { data: any[], dataType: string }) => {
     //         setCurrentIndex(index);
     //     }
     // };
-    const translateY = useSharedValue(0);
-    const contextY = useSharedValue(0);
+
 
     const panGesture = Gesture.Pan()
         .onStart(() => {
             // 记录起始位置
             contextY.value = translateY.value;
+            contextX.value = translateX.value;
         })
         .onUpdate((event) => {
             translateY.value = contextY.value + event.translationY;
+            translateX.value = contextX.value + event.translationX;
         })
         .onEnd((event) => {
             // 计算手势结束后的目标索引
@@ -135,6 +151,13 @@ const Slide = ({ data, dataType }: { data: any[], dataType: string }) => {
             const nextIndex = Math.round(-(contextY.value + scrollDistance) / ITEM_HEIGHT);//计算目标index
             const clampedIndex = Math.max(0, Math.min(data.length - 1, nextIndex));//做限定幅度
 
+            const SWIPE_THRESHOLD = 80; 
+            if (translateX.value < -SWIPE_THRESHOLD || event.velocityX < -500) {
+                scheduleOnRN(navigation.navigate, 'Settings');
+                // 跳转后重置 X 轴，防止回来时位置不对
+                translateX.value = withSpring(0);
+                return; // 触发左滑就不再处理上下滑逻辑
+            }
             // 弹性对齐动画
             translateY.value = withSpring(-clampedIndex * ITEM_HEIGHT, {
                 damping: 100,
@@ -145,6 +168,24 @@ const Slide = ({ data, dataType }: { data: any[], dataType: string }) => {
             scheduleOnRN(setCurrentIndex,clampedIndex)
         });
 
+    // const containerAnimatedStyle = useAnimatedStyle(() => {
+    //     // 增加一个阻尼感，让左右滑动稍微沉重一点，或者直接 1:1 跟随
+    //     const transX = translateX.value;
+    //     // 联动效果：左滑时稍微缩小一点点，增加空间感
+    //     const scale = interpolate(
+    //         Math.abs(transX),
+    //         [0, WINDOW_WIDTH],
+    //         [1, 0.95],
+    //         Extrapolation.CLAMP
+    //     );
+
+        // return {
+        //     transform: [
+        //         { translateX: transX },
+        //         { scale: scale }
+        //     ],
+        // };
+    // });
     return (
         <View style={styles.container}>
             <GestureDetector gesture={panGesture}>
@@ -155,7 +196,9 @@ const Slide = ({ data, dataType }: { data: any[], dataType: string }) => {
                             index={index}
                             translateY={translateY}
                             item={data[index]} 
-                            dataType={dataType} 
+                            dataType={data[index]?.type || dataType}
+                            ITEM_HEIGHT={ITEM_HEIGHT}
+                            videoConfig={{ paused: currentIndex !== index, repeat: true }}
                         />
                     ))}
                 </Animated.View>

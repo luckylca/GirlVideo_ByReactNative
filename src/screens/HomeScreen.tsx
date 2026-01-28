@@ -8,13 +8,13 @@ interface Styles {
 }
 const HomeScreen = ({navigation}:any) => {
     const data = [
-        { id: '1', type: 'image', uri: 'https://picsum.photos/300/200?random=1' },
-        { id: '2', type: 'video', uri: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4' },
-        { id: '3', type: 'image', uri: 'https://picsum.photos/300/200?random=3' },
-        { id: '4', type: 'image', uri: 'https://picsum.photos/300/200?random=4' },
-        { id: '5', type: 'image', uri: 'https://picsum.photos/300/200?random=5' },
-        { id: '6', type: 'image', uri: 'https://picsum.photos/300/200?random=6' },
-        { id: '7', type: 'image', uri: 'https://picsum.photos/300/200?random=7' },
+        { id: '1', type: 'video', uri: 'https://www.w3schools.com/html/mov_bbb.mp4' },
+        { id: '2', type: 'video', uri: 'https://www.w3schools.com/html/mov_bbb.mp4' },
+        { id: '3', type: 'video', uri: 'https://www.w3schools.com/html/mov_bbb.mp4' },
+        { id: '4', type: 'video', uri: 'https://www.w3schools.com/html/mov_bbb.mp4' },
+        { id: '5', type: 'video', uri: 'https://www.w3schools.com/html/mov_bbb.mp4' },
+        { id: '6', type: 'video', uri: 'https://www.w3schools.com/html/mov_bbb.mp4' },
+        { id: '7', type: 'video', uri: 'https://www.w3schools.com/html/mov_bbb.mp4' },
         { id: '8', type: 'image', uri: 'https://picsum.photos/300/200?random=8' },
         { id: '9', type: 'image', uri: 'https://picsum.photos/300/200?random=9' },
         { id: '10', type: 'image', uri: 'https://picsum.photos/300/200?random=10' },

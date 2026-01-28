@@ -5695,6 +5695,11 @@ react-is@^19.1.0, react-is@^19.2.0:
   resolved "https://registry.npmmirror.com/react-is/-/react-is-19.2.3.tgz#eec2feb69c7fb31f77d0b5c08c10ae1c88886b29"
   integrity sha512-qJNJfu81ByyabuG7hPFEbXqNcWSU3+eVus+KJs+0ncpGfMyYdvSmxiJxbWR65lYi1I+/0HBcliO029gc4F+PnA==
 
+react-native-create-thumbnail@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.npmmirror.com/react-native-create-thumbnail/-/react-native-create-thumbnail-2.2.0.tgz#d5c99c97c02cd5c51a57983f5d79088e58e986bb"
+  integrity sha512-zrwVYWMpeMEGIYO1jgwUMBpSpIzMR7Z2gkSANVlf9BFZLRw017k7CfjttvDhCHjsxNNDb7+V8uJaNwIGdTpz/g==
+
 react-native-drawer-layout@^4.2.1:
   version "4.2.1"
   resolved "https://registry.npmmirror.com/react-native-drawer-layout/-/react-native-drawer-layout-4.2.1.tgz#5c89425662c9b5216a227dbc87bc7f38c4ec8719"

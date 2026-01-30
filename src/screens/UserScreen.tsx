@@ -51,7 +51,7 @@ const RightAction = ({ progress: _progress, drag, onDelete }: { progress: Shared
     );
 }
 
-const SettingsScreen = ({ navigation: _navigation }: any) => {
+const UserScreen = ({ navigation }: any) => {
     const userStore = useUserStore();
 
 
@@ -85,8 +85,8 @@ const SettingsScreen = ({ navigation: _navigation }: any) => {
     const [isLoading, setIsLoading] = React.useState(false);
 
     const [videoChannels, setVideoChannels] = React.useState([
-        { id: '1', name: '频道1', status: '在线', url: 'https://example.com/channel1' },
-        { id: '2', name: '频道2', status: '离线', url: 'https://example.com/channel2' },
+        { id: '1', name: '小姐姐1', status: '在线', url: 'http://api.yujn.cn/api/zzxjj.php?type=json' },
+        { id: '2', name: '小姐姐2', status: '在线', url: 'http://api.yujn.cn/api/xjj.php?type=json' },
         { id: '3', name: '频道3', status: '维护中', url: 'https://example.com/channel3' },
         { id: '4', name: '频道4', status: '在线', url: 'https://example.com/channel4' },
     ]);
@@ -263,21 +263,21 @@ const SettingsScreen = ({ navigation: _navigation }: any) => {
                 <Button mode="elevated" onPress={openDrawer} style={{ width: '80%', marginBottom: 20 }}>
                     <Text style={{ textAlign: 'center', padding: 18, fontSize: 18 }}>数据源选择</Text>
                 </Button>
-                <Button mode="elevated" onPress={() => { }} style={{ width: '80%', marginBottom: 20 }}>
+                <Button mode="elevated" onPress={() => { navigation.navigate('Like'); }} style={{ width: '80%', marginBottom: 20 }}>
                     <Text style={{ textAlign: 'center', padding: 18, fontSize: 18 }}>收藏列表</Text>
                 </Button>
-                <Button mode="elevated" onPress={() => { }} style={{ width: '80%', marginBottom: 20 }}>
+                <Button mode="elevated" onPress={() => { navigation.navigate('Download'); }} style={{ width: '80%', marginBottom: 20 }}>
                     <Text style={{ textAlign: 'center', padding: 18, fontSize: 18 }}>下载列表</Text>
                 </Button>
-                <Button mode="elevated" onPress={() => { }} style={{ width: '80%', marginBottom: 20 }}>
+                <Button mode="elevated" onPress={() => { navigation.navigate('AddVideo'); }} style={{ width: '80%', marginBottom: 20 }}>
                     <Text style={{ textAlign: 'center', padding: 18, fontSize: 18 }}>导入视频</Text>
                 </Button>
-                <Button mode="elevated" onPress={() => { }} style={{ width: '80%', marginBottom: 20 }}>
+                <Button mode="elevated" onPress={() => { navigation.navigate('Settings'); }} style={{ width: '80%', marginBottom: 20 }}>
                     <Text style={{ textAlign: 'center', padding: 18, fontSize: 18 }}>设置</Text>
                 </Button>
-                <Button mode="elevated" onPress={() => { }} style={{ width: '80%', marginBottom: 20 }}>
+                {/* <Button mode="elevated" onPress={() => { }} style={{ width: '80%', marginBottom: 20 }}>
                     <Text style={{ textAlign: 'center', padding: 18, fontSize: 18 }}>关于APP</Text>
-                </Button>
+                </Button> */}
             </ScrollView>
         </DrawerLayout>
     );
@@ -354,4 +354,4 @@ const styles = StyleSheet.create<Styles>({
     },
 });
 
-export default SettingsScreen;
+export default UserScreen;

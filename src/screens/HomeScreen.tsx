@@ -8,13 +8,13 @@ interface Styles {
 }
 const HomeScreen = ({navigation}:any) => {
     const data = [
-        { id: '1', type: 'video', uri: 'https://www.w3schools.com/html/mov_bbb.mp4' },
-        { id: '2', type: 'video', uri: 'https://www.w3schools.com/html/mov_bbb.mp4' },
-        { id: '3', type: 'video', uri: 'https://www.w3schools.com/html/mov_bbb.mp4' },
-        { id: '4', type: 'video', uri: 'https://www.w3schools.com/html/mov_bbb.mp4' },
-        { id: '5', type: 'video', uri: 'https://www.w3schools.com/html/mov_bbb.mp4' },
-        { id: '6', type: 'video', uri: 'https://www.w3schools.com/html/mov_bbb.mp4' },
-        { id: '7', type: 'video', uri: 'https://www.w3schools.com/html/mov_bbb.mp4' },
+        { id: '1', type: 'video', uri: 'https://txmov2.a.kwimgs.com/upic/2023/08/19/17/BMjAyMzA4MTkxNzMwMjNfMjUxNjc0Njk4MF8xMTA4ODcyODMzNjdfMV8z_b_B08fe6e87ba8e5183e3f394f1bd447f81.mp4?clientCacheKey=3xhdye6r8qf3386_b.mp4&tt=b&di=65ed8104&bp=14214' },
+        { id: '2', type: 'video', uri: 'https://txmov2.a.kwimgs.com/upic/2023/08/19/17/BMjAyMzA4MTkxNzMwMjNfMjUxNjc0Njk4MF8xMTA4ODcyODMzNjdfMV8z_b_B08fe6e87ba8e5183e3f394f1bd447f81.mp4?clientCacheKey=3xhdye6r8qf3386_b.mp4&tt=b&di=65ed8104&bp=14214' },
+        { id: '3', type: 'video', uri: 'https://txmov2.a.kwimgs.com/upic/2023/08/19/17/BMjAyMzA4MTkxNzMwMjNfMjUxNjc0Njk4MF8xMTA4ODcyODMzNjdfMV8z_b_B08fe6e87ba8e5183e3f394f1bd447f81.mp4?clientCacheKey=3xhdye6r8qf3386_b.mp4&tt=b&di=65ed8104&bp=14214' },
+        { id: '4', type: 'video', uri: 'https://txmov2.a.kwimgs.com/upic/2023/08/19/17/BMjAyMzA4MTkxNzMwMjNfMjUxNjc0Njk4MF8xMTA4ODcyODMzNjdfMV8z_b_B08fe6e87ba8e5183e3f394f1bd447f81.mp4?clientCacheKey=3xhdye6r8qf3386_b.mp4&tt=b&di=65ed8104&bp=14214' },
+        { id: '5', type: 'video', uri: 'https://txmov2.a.kwimgs.com/upic/2023/08/19/17/BMjAyMzA4MTkxNzMwMjNfMjUxNjc0Njk4MF8xMTA4ODcyODMzNjdfMV8z_b_B08fe6e87ba8e5183e3f394f1bd447f81.mp4?clientCacheKey=3xhdye6r8qf3386_b.mp4&tt=b&di=65ed8104&bp=14214' },
+        { id: '6', type: 'video', uri: 'https://txmov2.a.kwimgs.com/upic/2023/08/19/17/BMjAyMzA4MTkxNzMwMjNfMjUxNjc0Njk4MF8xMTA4ODcyODMzNjdfMV8z_b_B08fe6e87ba8e5183e3f394f1bd447f81.mp4?clientCacheKey=3xhdye6r8qf3386_b.mp4&tt=b&di=65ed8104&bp=14214' },
+        { id: '7', type: 'video', uri: 'https://txmov2.a.kwimgs.com/upic/2023/08/19/17/BMjAyMzA4MTkxNzMwMjNfMjUxNjc0Njk4MF8xMTA4ODcyODMzNjdfMV8z_b_B08fe6e87ba8e5183e3f394f1bd447f81.mp4?clientCacheKey=3xhdye6r8qf3386_b.mp4&tt=b&di=65ed8104&bp=14214' },
         { id: '8', type: 'image', uri: 'https://picsum.photos/300/200?random=8' },
         { id: '9', type: 'image', uri: 'https://picsum.photos/300/200?random=9' },
         { id: '10', type: 'image', uri: 'https://picsum.photos/300/200?random=10' },

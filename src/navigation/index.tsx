@@ -4,17 +4,25 @@ import { createMaterialBottomTabNavigator } from 'react-native-paper/react-navig
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import HomeScreen from '../screens/HomeScreen';
+import UserScreen from '../screens/UserScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import LikeScreen from '../screens/LikeScreen';
+import AddVideoScreen from '../screens/AddVideoScreen';
+import DownloadScreen from '../screens/DownloadScreen';
 
 // 1. 定义路由参数列表
 export type RootStackParamList = {
     MainTabs: undefined;
+    Settings: undefined;
+    Like: undefined;
+    AddVideo: undefined;
+    Download: undefined;
 };
 
 // 2. 定义 Tab 参数列表
 export type TabParamList = {
     Home: undefined;
-    Settings: undefined;
+    User: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -35,12 +43,12 @@ const TabNavigator = () => {
                 }}
             />
             <Tab.Screen
-                name="Settings"
-                component={SettingsScreen}
+                name="User"
+                component={UserScreen}
                 options={{
-                    tabBarLabel: '设置',
+                    tabBarLabel: '我的',
                     tabBarIcon: ({ color }) => (
-                        <MaterialCommunityIcons name="cog" color={color} size={26} />
+                        <MaterialCommunityIcons name="account" color={color} size={26} />
                     ),
                 }}
             />
@@ -54,6 +62,22 @@ export const RootNavigator = () => {
             <Stack.Screen
                 name="MainTabs"
                 component={TabNavigator}
+            />
+            <Stack.Screen
+                name="Settings"
+                component={SettingsScreen}
+            />
+            <Stack.Screen
+                name="Like"
+                component={LikeScreen}
+            />
+            <Stack.Screen
+                name="AddVideo"
+                component={AddVideoScreen}
+            />
+            <Stack.Screen
+                name="Download"
+                component={DownloadScreen}
             />
         </Stack.Navigator>
     );

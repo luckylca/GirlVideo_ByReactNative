@@ -1,11 +1,15 @@
-import {creat} from 'zustand';
+import {create} from 'zustand';
 
 interface SettingState {
-    darkMode: boolean;
-    toggleDarkMode: () => void;
+    autoPlay: boolean;
+    setAutoPlay: (value: boolean) => void;
+    fastForwardRate?: number;
+    setFastForwardRate?: (value: number) => void;
 }
 
-export const useSettingStore = creat<SettingState>((set) => ({
-    darkMode: false,
-    toggleDarkMode: () => set((state) => ({ darkMode: !state.darkMode })),
+export const useSettingStore = create<SettingState>((set) => ({
+    autoPlay: false,
+    setAutoPlay: (value: boolean) => set(() => ({ autoPlay: value })),
+    fastForwardRate: 2.0,
+    setFastForwardRate: (value: number) => set(() => ({ fastForwardRate: value })),
 }));

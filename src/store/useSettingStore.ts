@@ -5,6 +5,8 @@ interface SettingState {
     setAutoPlay: (value: boolean) => void;
     fastForwardRate?: number;
     setFastForwardRate?: (value: number) => void;
+    chanelId?: string;
+    setChanelId?: (value: string) => void;
 }
 
 export const useSettingStore = create<SettingState>((set) => ({
@@ -12,4 +14,6 @@ export const useSettingStore = create<SettingState>((set) => ({
     setAutoPlay: (value: boolean) => set(() => ({ autoPlay: value })),
     fastForwardRate: 2.0,
     setFastForwardRate: (value: number) => set(() => ({ fastForwardRate: value })),
+    chanelId: "0",
+    setChanelId: (value: string) => set(() => ({ chanelId: value })),
 }));

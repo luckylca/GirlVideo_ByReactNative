@@ -1,8 +1,9 @@
 /* eslint-disable react-native/no-inline-styles */
 import React = require("react");
 import { ViewStyle, TextStyle, StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
-import { Button, Text, Avatar, Card, Switch, Modal ,Portal, TextInput, IconButton, HelperText, Dialog } from 'react-native-paper';
+import { Button, Text, Avatar, Card, Switch, Modal ,Portal, TextInput, IconButton, HelperText, Dialog,RadioButton, TouchableRipple  } from 'react-native-paper';
 import { useUserStore } from '../store/useUserStore';
+import { useSettingStore } from '../store/useSettingStore';
 import { DrawerLayout } from 'react-native-gesture-handler';
 import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { BackHandler } from 'react-native';
@@ -53,7 +54,7 @@ const RightAction = ({ progress: _progress, drag, onDelete }: { progress: Shared
 
 const UserScreen = ({ navigation }: any) => {
     const userStore = useUserStore();
-
+    const settingStore = useSettingStore();
 
     const [isSwitchOn, setIsSwitchOn] = React.useState(false);
     const onToggleSwitch = () => setIsSwitchOn(!isSwitchOn);
@@ -174,13 +175,17 @@ const UserScreen = ({ navigation }: any) => {
                     >
                         {/* 列表项内容 */}
                         <View style={{
-                            padding: 20,
+                            padding: 10,
                             borderBottomWidth: 1,
                             borderColor: '#eee',
-                            backgroundColor: '#fff' // 必须有背景色，否则滑动的底层会透出来
+                            backgroundColor: '#fff', // 必须有背景色，否则滑动的底层会透出来
+                            flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center'
                         }}>
-                            <Text style={{ fontSize: 16 }}>{item.name}</Text>
-                            <Text style={{ fontSize: 12, color: 'gray' }}>{item.status}</Text>
+                            <RadioButton value={item.id} status={settingStore.chanelId === String(item.id) ? 'checked' : 'unchecked'} onPress={() => settingStore.setChanelId(String(item.id))}/>
+                            <TouchableOpacity style={{ marginLeft: 10,justifyContent: 'flex-start' }} onPress={() => { settingStore.setChanelId(String(item.id)) }}>
+                                <Text style={{ fontSize: 16 }}>{item.name}</Text>
+                                <Text style={{ fontSize: 12, color: 'gray' }}>{item.status}</Text>
+                            </TouchableOpacity>
                         </View>
                     </ReanimatedSwipeable>
                 ))}
@@ -213,7 +218,7 @@ const UserScreen = ({ navigation }: any) => {
                         onDismiss={hideModal}
                         contentContainerStyle={styles.modalContainer}
                     >
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={hideModal}>
                             <IconButton size={40} icon="close-circle" iconColor="red" style={styles.closeButton} />
                         </TouchableOpacity>
                         <Avatar.Icon size={100} icon="folder" style={styles.avatar} />
@@ -268,9 +273,6 @@ const UserScreen = ({ navigation }: any) => {
                 </Button>
                 <Button mode="elevated" onPress={() => { navigation.navigate('Download'); }} style={{ width: '80%', marginBottom: 20 }}>
                     <Text style={{ textAlign: 'center', padding: 18, fontSize: 18 }}>下载列表</Text>
-                </Button>
-                <Button mode="elevated" onPress={() => { navigation.navigate('AddVideo'); }} style={{ width: '80%', marginBottom: 20 }}>
-                    <Text style={{ textAlign: 'center', padding: 18, fontSize: 18 }}>导入视频</Text>
                 </Button>
                 <Button mode="elevated" onPress={() => { navigation.navigate('Settings'); }} style={{ width: '80%', marginBottom: 20 }}>
                     <Text style={{ textAlign: 'center', padding: 18, fontSize: 18 }}>设置</Text>
@@ -331,11 +333,11 @@ const styles = StyleSheet.create<Styles>({
         borderRadius: 8,
         justifyContent: 'center',
         alignItems: 'center',
+        position: 'relative',
     },
     closeButton: {
         position: 'absolute',
-        top: -10,
-        left: 125,
+        right: -190,
     },
     input: {
         width: 200,

@@ -5,6 +5,9 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Svg, { Path } from 'react-native-svg';
 import { scheduleOnRN } from 'react-native-worklets';
 import HeartComponent from "./Heart";
+import { useSettingStore } from '@/store/useSettingStore';
+
+
 const { height: WINDOW_HEIGHT, width: WINDOW_WIDTH } = Dimensions.get('window');
 const NAV_BAR_HEIGHT = 80;
 interface Styles {
@@ -40,6 +43,7 @@ const RateView = ({ rate }: { rate: number }) => {
 
 const VideoLayout = React.memo(({ item, paused, repeat, onended }: { item: any, paused: boolean, repeat: boolean, onended?: () => void }) => {
     const videoRef = React.useRef<VideoRef>(null);
+    const settingStore = useSettingStore();
     const [manualPaused, setManualPaused] = React.useState(false);
     const pausedState = paused || manualPaused;
     const [hearts,setHearts] = React.useState<{id:number,x:number,y:number}[]>([]);
@@ -53,7 +57,9 @@ const VideoLayout = React.memo(({ item, paused, repeat, onended }: { item: any, 
     }
     const videoEnd = () => {
         videoRef.current?.seek(0);
-        onended();
+        if(settingStore.autoPlay){
+            onended();
+        }
     }
     const singleTap = Gesture.Tap()
         .numberOfTaps(1)

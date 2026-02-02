@@ -57,7 +57,10 @@ const UserScreen = ({ navigation }: any) => {
     const settingStore = useSettingStore();
 
     const [isSwitchOn, setIsSwitchOn] = React.useState(false);
-    const onToggleSwitch = () => setIsSwitchOn(!isSwitchOn);
+    const onToggleSwitch = () => {
+        setIsSwitchOn(!isSwitchOn)
+        settingStore.setAutoPlay(!isSwitchOn);
+    };
 
     const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
 
@@ -85,12 +88,7 @@ const UserScreen = ({ navigation }: any) => {
 
     const [isLoading, setIsLoading] = React.useState(false);
 
-    const [videoChannels, setVideoChannels] = React.useState([
-        { id: '1', name: '小姐姐1', status: '在线', url: 'http://api.yujn.cn/api/zzxjj.php?type=json' },
-        { id: '2', name: '小姐姐2', status: '在线', url: 'http://api.yujn.cn/api/xjj.php?type=json' },
-        { id: '3', name: '频道3', status: '维护中', url: 'https://example.com/channel3' },
-        { id: '4', name: '频道4', status: '在线', url: 'https://example.com/channel4' },
-    ]);
+    const [videoChannels, setVideoChannels] = React.useState(userStore.chanelList || []);
 
     const swipeableRefs = React.useRef<Map<string, SwipeableRef>>(new Map());
 
@@ -103,6 +101,7 @@ const UserScreen = ({ navigation }: any) => {
 
     const confirmDeleteItem = () => {
         setVideoChannels(current => current.filter(item => item.id !== deleteItem));
+        userStore.removeChanel?.(deleteItem!);
         hideDialog();
     }
     const login = () => {
@@ -277,9 +276,6 @@ const UserScreen = ({ navigation }: any) => {
                 <Button mode="elevated" onPress={() => { navigation.navigate('Settings'); }} style={{ width: '80%', marginBottom: 20 }}>
                     <Text style={{ textAlign: 'center', padding: 18, fontSize: 18 }}>设置</Text>
                 </Button>
-                {/* <Button mode="elevated" onPress={() => { }} style={{ width: '80%', marginBottom: 20 }}>
-                    <Text style={{ textAlign: 'center', padding: 18, fontSize: 18 }}>关于APP</Text>
-                </Button> */}
             </ScrollView>
         </DrawerLayout>
     );

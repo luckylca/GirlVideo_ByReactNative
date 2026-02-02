@@ -66,7 +66,7 @@ const SlideItem = React.memo(({ index, translateY, item, dataType, ITEM_HEIGHT, 
     );
 })
 
-const Slide = ({ data, dataType }: { data: any[], dataType: string }) => {
+const Slide = ({ data, dataType, onIndexChange }: { data: any[], dataType: string, onIndexChange?: (index: number) => void }) => {
     const [currentIndex, setCurrentIndex] = React.useState(0);
 
     const translateY = useSharedValue(0);
@@ -115,6 +115,9 @@ const Slide = ({ data, dataType }: { data: any[], dataType: string }) => {
             });
 
             scheduleOnRN(setCurrentIndex, clampedIndex)
+            if (onIndexChange) {
+                scheduleOnRN(onIndexChange, clampedIndex);
+            }
         });
 
     const goToNextVideo = () => {
@@ -126,6 +129,9 @@ const Slide = ({ data, dataType }: { data: any[], dataType: string }) => {
                 mass: 1,
             });
             setCurrentIndex(currentIndex + 1);
+            if (onIndexChange) {
+                onIndexChange(currentIndex + 1);
+            }   
         }
     }
 

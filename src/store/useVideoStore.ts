@@ -1,8 +1,12 @@
+// src/store/useVideoStore.ts
+// 这里面放的是视频相关的信息，比如视频列表等
+
+
 import { create } from 'zustand';
 
 interface VideoState {
-    videoList: Array<{ id: string; uri: string; type: string }>;
-    addVideo: (video: { id: string; uri: string; type: string }) => void;
+    videoList: Array<{ id: string; uri: string; type: string;description?: string }>;
+    addVideo: (video: { id: string; uri: string; type: string;description?: string }) => void;
     removeVideo: (id: string) => void;
 }
 

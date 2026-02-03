@@ -2,6 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, Easing } from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign'; // 假设你安装了react-native-vector-icons
+import { HeartOverlayIcon } from './OverLayIcon';
 
 const HeartComponent = ({ startX, startY, onAnimationEnd }) => {
     const scaleAnim = useRef(new Animated.Value(0)).current; // 初始大小为0
@@ -32,13 +33,18 @@ const HeartComponent = ({ startX, startY, onAnimationEnd }) => {
         position: 'absolute' as const,
         left: startX - (styles.heart.width / 2), // 居中爱心
         top: startY - (styles.heart.height / 2), // 居中爱心
-        transform: [{ scale: scaleAnim }, { rotate: `${randomAngle}deg` }], // 应用放大动画和旋转动画
+        transform: [{ scale: scaleAnim }], // 应用放大动画和旋转动画
         opacity: opacityAnim, // 应用淡出动画
+        pointerEvents: 'none' as const, // 让爱心不阻挡触摸事件
     };
+
+    const rotate = Math.random() * 30 - 15; // 随机旋转角度，范围-15到15度
+    heartStyle.transform.push({ rotate: `${rotate}deg` });
 
     return (
         <Animated.View style={heartStyle}>
-            <Icon name="heart" size={styles.heart.width} color="red" />
+            {/* <Icon name="heart" size={styles.heart.width} color="red" /> */}
+            <HeartOverlayIcon size={styles.heart.width} />
         </Animated.View>
     );
 };

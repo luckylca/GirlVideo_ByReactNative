@@ -2,11 +2,11 @@ import React from 'react';
 import { ViewStyle, StyleSheet, View, Dimensions, Text, TextStyle } from 'react-native';
 import Video, { VideoRef } from 'react-native-video';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Defs, Filter, FeDropShadow, Circle, Rect } from "react-native-svg";
 import { scheduleOnRN } from 'react-native-worklets';
 import HeartComponent from "./Heart";
 import { useSettingStore } from '@/store/useSettingStore';
-
+import { PauseOverlayIcon } from './OverLayIcon';
 
 const { height: WINDOW_HEIGHT, width: WINDOW_WIDTH } = Dimensions.get('window');
 const NAV_BAR_HEIGHT = 80;
@@ -26,9 +26,17 @@ const PauseView = () => {
             backgroundColor: 'transparent',
             pointerEvents: 'box-none',
         }}>
-            <Svg viewBox="0 0 1024 1024" width={100} height={100}>
-                <Path d="M512 0C229.227168 0 0 229.227168 0 512s229.227168 512 512 512S1024 794.772832 1024 512 794.772832 0 512 0z m183.134237 556.605165l-234.455205 209.955734c-37.541754 23.428835-84.621894-5.853733-84.621894-52.725307v-419.911468c0-46.85767 47.010618-76.154143 84.621894-52.725308l234.455205 209.955734c37.611276 23.44274 37.611276 82.02178 0 105.450615z" />
+            <Svg width="96" height="96" viewBox="0 0 24 24" accessibilityLabel="Pause">
+                <defs>
+                    <filter id="ds" x="-50%" y="-50%" width="200%" height="200%">
+                        <feDropShadow dx="0" dy="1" stdDeviation="1.2" flood-color="#000" flood-opacity="0.35" />
+                    </filter>
+                </defs>
+                <circle cx="12" cy="12" r="10" fill="#000" opacity="0.40" filter="url(#ds)" />
+                <rect x="8.2" y="7.3" width="2.8" height="9.4" rx="1.2" fill="#fff" />
+                <rect x="13.0" y="7.3" width="2.8" height="9.4" rx="1.2" fill="#fff" />
             </Svg>
+
         </View>
     )
 }
@@ -46,18 +54,18 @@ const VideoLayout = React.memo(({ item, paused, repeat, onended }: { item: any, 
     const settingStore = useSettingStore();
     const [manualPaused, setManualPaused] = React.useState(false);
     const pausedState = paused || manualPaused;
-    const [hearts,setHearts] = React.useState<{id:number,x:number,y:number}[]>([]);
-    const [rate,setRate] = React.useState(1.0);
-    const generationHearts = (x:number,y:number) => {
-        const newHeart = { id: Date.now(), x, y };
+    const [hearts, setHearts] = React.useState<{ id: number, x: number, y: number }[]>([]);
+    const [rate, setRate] = React.useState(1.0);
+    const generationHearts = (x: number, y: number) => {
+        const newHeart = { id: Date.now()+Math.random(), x, y };
         setHearts((prevHearts) => [...prevHearts, newHeart]);
     }
-    const handleHeartsAnimationEnd = (id:number) => {
+    const handleHeartsAnimationEnd = (id: number) => {
         setHearts((prevHearts) => prevHearts.filter(h => h.id !== id));
     }
     const videoEnd = () => {
         videoRef.current?.seek(0);
-        if(settingStore.autoPlay){
+        if (settingStore.autoPlay) {
             onended();
         }
     }
@@ -70,11 +78,11 @@ const VideoLayout = React.memo(({ item, paused, repeat, onended }: { item: any, 
         .numberOfTaps(2)
         .onEnd((event) => {
             const { x, y } = event;
-            scheduleOnRN(generationHearts,x,y)
+            scheduleOnRN(generationHearts, x, y)
         });
     const longPress = Gesture.LongPress()
         .onStart(() => {
-            scheduleOnRN(setRate, 3.0);
+            scheduleOnRN(setRate, settingStore.fastForwardRate);
         })
         .onEnd(() => {
             scheduleOnRN(setRate, 1.0);
@@ -87,7 +95,7 @@ const VideoLayout = React.memo(({ item, paused, repeat, onended }: { item: any, 
                     style={{ width: WINDOW_WIDTH, height: WINDOW_HEIGHT - NAV_BAR_HEIGHT }}
                     resizeMode="contain"
                     paused={pausedState}
-                    ref = {videoRef}
+                    ref={videoRef}
                     repeat={repeat}
                     rate={rate}
                     playInBackground={false} // 切后台必须暂停
@@ -108,7 +116,7 @@ const VideoLayout = React.memo(({ item, paused, repeat, onended }: { item: any, 
                         }}
                     />
                 ))}
-                {pausedState && <PauseView />}
+                {pausedState && <PauseOverlayIcon style={{ position: 'absolute', top: '50%', left: '50%', transform: [{ translateX: -48 }, { translateY: -48 }] }} />}
                 {rate !== 1.0 && <RateView rate={rate} />}
             </View>
         </GestureDetector>

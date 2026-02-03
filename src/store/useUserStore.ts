@@ -22,8 +22,8 @@ export const useUserStore = create<UserState>((set) => ({
     logOut: () => set({ username: '', password: '', isLoggedIn: false }),
 
     chanelList: [
-        { id: '0', name: '小姐姐1', status: '在线', url: 'http://api.yujn.cn/api/zzxjj.php?type=json' , type: 'video' },
-        { id: '1', name: '小姐姐2', status: '在线', url: 'http://api.yujn.cn/api/xjj.php?type=json' , type: 'video' },
+        { id: '0', name: '小姐姐1', status: '在线', url: 'https://api.yujn.cn/api/zzxjj.php?type=json' , type: 'video' },
+        { id: '1', name: '小姐姐2', status: '在线', url: 'https://api.yujn.cn/api/xjj.php?type=json' , type: 'video' },
     ],
     addChanel: (chanel) => set((state) => ({ chanelList: [...(state.chanelList || []), chanel] })),
     removeChanel: (id) => set((state) => ({ chanelList: (state.chanelList || []).filter(chanel => chanel.id !== id) })),

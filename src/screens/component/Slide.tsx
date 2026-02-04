@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import VideoLayout from './VideoLayout';
 import ImageLayout from './ImageLayout';
-
+import { useIsFocused } from '@react-navigation/native';
 interface Styles {
     container: ViewStyle;
     itemContainer: ViewStyle;
@@ -31,6 +31,7 @@ const NAV_BAR_HEIGHT = 80;
 
 
 const SlideItem = React.memo(({ index, translateY, item, dataType, ITEM_HEIGHT, videoConfig }: { index: number, translateY: any, item: any, dataType: string, ITEM_HEIGHT: number, videoConfig: any }) => {
+    const isFocus = useIsFocused();
     const animatedStyle = useAnimatedStyle(() => {
         // 计算当前项相对于视口中心的偏移量
         const offset = (translateY.value as number) + index * ITEM_HEIGHT;
@@ -60,7 +61,7 @@ const SlideItem = React.memo(({ index, translateY, item, dataType, ITEM_HEIGHT, 
     });
     return (
         <Animated.View style={[styles.itemContainer, { height: ITEM_HEIGHT }, animatedStyle]}>
-            {dataType === 'video' && <VideoLayout item={item} paused={videoConfig?.paused} repeat={videoConfig?.repeat} onended={videoConfig?.onended} />}
+            {dataType === 'video' && <VideoLayout item={item} paused={videoConfig?.paused || !isFocus} repeat={videoConfig?.repeat} onended={videoConfig?.onended} />}
             {dataType === 'image' && <ImageLayout item={item} />}
         </Animated.View>
     );

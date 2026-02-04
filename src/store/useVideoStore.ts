@@ -5,8 +5,8 @@
 import { create } from 'zustand';
 
 interface VideoState {
-    videoList: Array<{ id: string; uri: string; type: string;description?: string }>;
-    addVideo: (video: { id: string; uri: string; type: string;description?: string }) => void;
+    videoList: Array<{ id: string; uri: string; type: string;description?: string;cover?:string }>;
+    addVideo: (video: { id: string; uri: string; type: string;description?: string;cover?:string }) => void;
     removeVideo: (id: string) => void;
 }
 

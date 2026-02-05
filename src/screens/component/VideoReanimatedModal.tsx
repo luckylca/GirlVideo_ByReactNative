@@ -1,0 +1,112 @@
+import React = require("react");
+import { StyleSheet, Dimensions, TouchableOpacity, View } from 'react-native';
+import { Portal } from 'react-native-paper';
+import Video from 'react-native-video';
+import Animated, {
+    useSharedValue,
+    useAnimatedStyle,
+    withSpring,
+    withTiming,
+    interpolate,
+    Extrapolation
+} from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
+import { useEffect } from "react";
+import VideoLayout from "./VideoLayout";
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const VideoReanimatedModal = ({origin, visible, url, onClose}: {origin: { x: number; y: number; width: number; height: number }, visible: boolean, url: string, onClose: () => void}) => {
+
+    const progress = useSharedValue(0);
+    const [showVideo, setShowVideo] = React.useState(visible);
+    useEffect(() => {
+        if (visible) {
+            setShowVideo(true);
+            progress.value = withSpring(1, {
+                damping: 50,
+                stiffness: 200,
+                mass: 1,
+            });
+        }
+        else {
+            progress.value = withTiming(0, { duration: 300 }, (finished) => {
+                if (finished) {
+                    scheduleOnRN(setShowVideo, false);
+                }
+            });
+        }
+    }, [visible, progress]);
+    useEffect(() => {
+        const backAction = (e: any) => {
+            if (visible) {
+                onClose();
+                return true;
+            }
+            return false;
+        };
+
+        const backHandler = require('react-native').BackHandler.addEventListener(
+            'hardwareBackPress',
+            backAction
+        );
+        return () => backHandler.remove();
+    }, [visible, onClose]);
+
+    const safeOrigin = origin ?? { x: 0, y: 0, width: 0, height: 0 };
+    const containerStyle = useAnimatedStyle(() => {
+        const top = interpolate(progress.value, [0, 1], [safeOrigin.y, 0]);
+        const left = interpolate(progress.value, [0, 1], [safeOrigin.x, 0]);
+        const width = interpolate(progress.value, [0, 1], [safeOrigin.width, SCREEN_WIDTH]);
+        const height = interpolate(progress.value, [0, 1], [safeOrigin.height, SCREEN_HEIGHT]);
+        const borderRadius = interpolate(progress.value, [0, 1], [10, 0]);
+
+        return {
+            top,
+            left,
+            width,
+            height,
+            borderRadius,
+        };
+    });
+    const backStyle = useAnimatedStyle(() => {
+        const opacity = interpolate(progress.value, [0, 1], [0, 0.7], Extrapolation.CLAMP);
+        return {
+            opacity,
+        };
+    });
+
+    if (!showVideo || url === "" || !origin) return (<></>);
+    return (
+        <Portal>
+            <Animated.View style={[styles.backdrop, backStyle]} />
+            <Animated.View style={[styles.animatedContainer, containerStyle]}>
+                <VideoLayout item={{ uri: url }} paused={!visible} repeat={false} onended={onClose} />
+            </Animated.View>
+        </Portal>
+    );
+}
+
+const styles = StyleSheet.create({
+    backdrop: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'black',
+    },
+    animatedContainer: {
+        position: 'absolute',
+        overflow: 'hidden', // 确保圆角生效
+        backgroundColor: 'black', // 避免动画过程中出现透明缝隙
+    },
+    video: {
+        width: '100%',
+        height: '100%',
+    },
+    closeBtnContainer: {
+        position: 'absolute',
+        top: 50,
+        left: 20,
+        zIndex: 10,
+    },
+});
+
+
+export default VideoReanimatedModal;

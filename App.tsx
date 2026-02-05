@@ -18,16 +18,16 @@ function App() {
 	const isDarkMode = useColorScheme() === 'dark';
 
 	return (
-		<SafeAreaProvider>
-			<StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-			<PaperProvider theme={theme}>
-				<GestureHandlerRootView style={{ flex: 1 }}>
+		<GestureHandlerRootView style={{ flex: 1 }}>
+			<SafeAreaProvider>
+				<StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+				<PaperProvider theme={theme}>
 					<NavigationContainer>
 						<RootNavigator />
 					</NavigationContainer>
-				</GestureHandlerRootView>
-			</PaperProvider>
-		</SafeAreaProvider>
+				</PaperProvider>
+			</SafeAreaProvider>
+		</GestureHandlerRootView>
 	);
 }
 

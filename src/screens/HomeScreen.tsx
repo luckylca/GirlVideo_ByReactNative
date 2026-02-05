@@ -20,7 +20,7 @@ const HomeScreen = ({navigation}:any) => {
     
     const getCurrentIndex = async (index: number) => {
         setCurrentIndex(index);
-        if(index === videoStore.videoList.length - 4){
+        if(index >= videoStore.videoList.length - 4){
             const url = userStore.chanelList.find(chanel => chanel.id === settingStore.chanelId)?.url;
             if (!url) {
                 return;

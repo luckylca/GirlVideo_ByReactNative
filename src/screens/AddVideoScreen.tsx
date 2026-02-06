@@ -3,13 +3,14 @@ import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import Header from "./component/Header";
 import { ScrollView } from "react-native-gesture-handler";
 import { Button, HelperText, TextInput, Portal, Dialog, ActivityIndicator, Modal, Snackbar, IconButton } from "react-native-paper";
-import getOtherVideo from "../api/GetOtherVideo";
-import { white } from "react-native-paper/lib/typescript/styles/themes/v2/colors";
+import getOtherVideo from "../api/douyin/GetOtherVideo";
 import VideoReanimatedModal from "./component/VideoReanimatedModal";
+import { createDouyinResolver } from "@/api/douyin/resolveDouyinUrl";
+import WebView from 'react-native-webview';
 
 
 const AddVideoScreen = ({ navigation }: any) => {
-    const [url, setUrl] = React.useState("https://www.douyin.com/user/MS4wLjABAAAAnCCjg32RdaNXS1twDgbCAEmGVwdQ_73NTL3hu5G-BQDnwoYjEGaMOiJu79JIyztR?from_tab_name=main");
+    const [url, setUrl] = React.useState("8- 长按复制此条消息，打开抖音搜索，查看TA的更多作品。 https://v.douyin.com/p9nMtw_UHzU/ 5@5.com :2pm");
     const [dialogVisible, setDialogVisible] = React.useState(false);
     const [snackbarVisible, setSnackbarVisible] = React.useState(false);
     const [isLoading, setIsLoading] = React.useState(false);
@@ -17,14 +18,83 @@ const AddVideoScreen = ({ navigation }: any) => {
     const [getVideoList, setGetVideoList] = React.useState<string[]>([]);
     const [getCoverList, setGetCoverList] = React.useState<string[]>([]);
     const [videoUrl, setVideoUrl] = React.useState<string>("");
+    const [rightUrl, setRightUrl] = React.useState<string>("");
     const [originLayout, setOriginLayout] = React.useState<{ x: number; y: number; width: number; height: number }>({ x: 0, y: 0, width: 0, height: 0 });
     const [videoVisible, setVideoVisible] = React.useState(false);
     const imageRefs = React.useRef<(View | null)[]>([]);
+
+    // WebView解析相关state
+    const [webViewUrl, setWebViewUrl] = React.useState<string>("");
+    const resolverRef = React.useRef<any>(null);
+    const resolveCallbackRef = React.useRef<((url: string) => void) | null>(null);
+    const rejectCallbackRef = React.useRef<((error: Error) => void) | null>(null);
+
     const hideDialog = () => setDialogVisible(false);
+
+    // 使用WebView解析短链接
+    const resolveWithWebView = (rawText: string): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            try {
+                const resolver = createDouyinResolver(rawText);
+
+                // 如果不需要WebView，直接返回
+                if (!resolver.needsWebView && resolver.userUrl) {
+                    resolve(resolver.userUrl);
+                    return;
+                }
+
+                // 需要WebView解析
+                resolverRef.current = resolver;
+                resolveCallbackRef.current = resolve;
+                rejectCallbackRef.current = reject;
+                setWebViewUrl(resolver.shortUrl!);
+            } catch (error: any) {
+                reject(error);
+            }
+        });
+    };
+
+    // WebView导航状态变化处理
+    const handleWebViewNavigationStateChange = (navState: any) => {
+        if (!resolverRef.current || !resolveCallbackRef.current) return;
+
+        const userUrl = resolverRef.current.extractUserIdFromUrl(navState.url);
+
+        if (userUrl) {
+            // 找到用户ID，返回结果
+            resolveCallbackRef.current(userUrl);
+            // 清理state
+            setWebViewUrl("");
+            resolverRef.current = null;
+            resolveCallbackRef.current = null;
+            rejectCallbackRef.current = null;
+        }
+    };
     const confirmUrl = async () => {
         hideDialog();
         setIsLoading(true);
-        const data = await getOtherVideo(url, page)
+        try {
+            // 使用WebView解析短链接
+            const tmpUrl = await resolveWithWebView(url);
+            setRightUrl(tmpUrl);
+            const data = await getOtherVideo(tmpUrl, page);
+            if (data.code === 200) {
+                setSnackbarVisible(true);
+                setIsLoading(false);
+            }
+            let covers = data.data.covers.map((item: { value: string }) => item.value);
+            setGetVideoList(prev => [...prev, ...data.data.video_url]);
+            setGetCoverList(prev => [...prev, ...covers]);
+        } catch (error: any) {
+            setIsLoading(false);
+            alert(`解析失败: ${error.message}`);
+        }
+    };
+
+    const refreshData = async () => {
+        setIsLoading(true);
+        const nextPage = page + 1;
+        const data = await getOtherVideo(rightUrl, nextPage);
         if (data.code === 200) {
             setSnackbarVisible(true);
             setIsLoading(false);
@@ -32,7 +102,9 @@ const AddVideoScreen = ({ navigation }: any) => {
         let covers = data.data.covers.map((item: { value: string }) => item.value);
         setGetVideoList(prev => [...prev, ...data.data.video_url]);
         setGetCoverList(prev => [...prev, ...covers]);
-    };
+        setPage(nextPage);
+    }
+
     const playVideo = (index: number) => {
         const targetRef = imageRefs.current[index];
         if (targetRef) {
@@ -43,14 +115,26 @@ const AddVideoScreen = ({ navigation }: any) => {
             });
         }
     }
+
+    const handleScroll = (event: any) => {
+        const { layoutMeasurement, contentOffset, contentSize } = event.nativeEvent;
+        const isBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 100;
+        if (isBottom && !isLoading) {
+            refreshData();
+        }
+    }
+
     return (
-        <ScrollView>
+        <ScrollView
+            onScroll={handleScroll}
+            scrollEventThrottle={8}
+            >
             <Portal>
                 <Dialog visible={dialogVisible} onDismiss={hideDialog}>
                     <Dialog.Title>链接</Dialog.Title>
                     <Dialog.Content>
-                        <TextInput mode="flat" value={url} onChangeText={setUrl} placeholder="请输入视频链接" contextMenuHidden={false} selectTextOnFocus={true} multiline={true} />
-                        <HelperText type="info">支持抖音视频链接</HelperText>
+                        <TextInput mode="flat" value={url} onChangeText={setUrl} placeholder="请输入主页链接" contextMenuHidden={false} selectTextOnFocus={true} multiline={false} />
+                        <HelperText type="info">支持抖音主页链接</HelperText>
                     </Dialog.Content>
                     <Dialog.Actions>
                         <Button onPress={() => { hideDialog(); }}>取消</Button>
@@ -75,6 +159,21 @@ const AddVideoScreen = ({ navigation }: any) => {
                     rippleColor="rgba(29, 78, 216, 0.1)"
                     style={styles.confirmButton}
                 />
+                {/* 隐藏的WebView用于捕获302重定向 */}
+                {webViewUrl ? (
+                    <View style={{ height: 0, width: 0, overflow: 'hidden' }}>
+                        <WebView
+                            source={{ uri: webViewUrl }}
+                            onNavigationStateChange={handleWebViewNavigationStateChange}
+                            onError={() => {
+                                if (rejectCallbackRef.current) {
+                                    rejectCallbackRef.current(new Error('WebView加载失败,请重试'));
+                                    setWebViewUrl("");
+                                }
+                            }}
+                        />
+                    </View>
+                ) : null}
             </Portal>
             <Header navigation={navigation} title="导入视频" />
             <Button onPress={() => setDialogVisible(true)} style={{ borderRadius: 10 }} mode="contained-tonal" contentStyle={{ paddingVertical: 10 }}>

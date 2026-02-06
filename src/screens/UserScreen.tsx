@@ -88,7 +88,7 @@ const UserScreen = ({ navigation }: any) => {
 
     const [isLoading, setIsLoading] = React.useState(false);
 
-    const [videoChannels, setVideoChannels] = React.useState(userStore.chanelList || []);
+    const videoChannels = userStore.chanelList || [];
 
     const swipeableRefs = React.useRef<Map<string, SwipeableRef>>(new Map());
 
@@ -100,7 +100,6 @@ const UserScreen = ({ navigation }: any) => {
     };
 
     const confirmDeleteItem = () => {
-        setVideoChannels(current => current.filter(item => item.id !== deleteItem));
         userStore.removeChanel?.(deleteItem!);
         hideDialog();
     }

@@ -20,7 +20,7 @@ const HomeScreen = ({navigation}:any) => {
     
     const getCurrentIndex = async (index: number) => {
         setCurrentIndex(index);
-        if(index >= videoStore.videoList.length - 4){
+        if(index >= videoStore.currentVideoList.length - 4){
             const url = userStore.chanelList.find(chanel => chanel.id === settingStore.chanelId)?.url;
             if (!url) {
                 return;
@@ -53,14 +53,14 @@ const HomeScreen = ({navigation}:any) => {
                 videoStore.addVideo(videoItem);
             }
         }
-        if(videoStore.videoList.length === 0){
+        if(videoStore.currentVideoList.length === 0){
             preloadVideos();
         }
     }, [settingStore.chanelId, userStore.chanelList, videoStore]);
 
     return (
         <View style={styles.container}>
-            <Slide data={videoStore.videoList} dataType="image" onIndexChange={getCurrentIndex}/>
+            <Slide data={videoStore.currentVideoList} dataType="image" onIndexChange={getCurrentIndex}/>
         </View>
     );
 }

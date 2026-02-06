@@ -5,13 +5,23 @@
 import { create } from 'zustand';
 
 interface VideoState {
-    videoList: Array<{ id: string; uri: string; type: string;description?: string;cover?:string }>;
+    currentVideoList: Array<{ id: string; uri: string; type: string;description?: string;cover?:string }>;
     addVideo: (video: { id: string; uri: string; type: string;description?: string;cover?:string }) => void;
     removeVideo: (id: string) => void;
+
+    channelVideoList?: Record<string, Array<{ id: string; uri: string; type: string;description?: string;cover?:string }>>;
+    setChannelVideoList?: (channelId: string, videos: Array<{ id: string; uri: string; type: string;description?: string;cover?:string }>) => void;
 }
 
 export const useVideoStore = create<VideoState>((set) => ({
-    videoList: [],
-    addVideo: (video) => set((state) => ({ videoList: [...state.videoList, video] })),
-    removeVideo: (id) => set((state) => ({ videoList: state.videoList.filter(video => video.id !== id) })),
+    currentVideoList: [],
+    addVideo: (video) => set((state) => ({ currentVideoList: [...state.currentVideoList, video] })),
+    removeVideo: (id) => set((state) => ({ currentVideoList: state.currentVideoList.filter(video => video.id !== id) })),
+    channelVideoList: {},
+    setChannelVideoList: (channelId, videos) => set((state) => ({
+        channelVideoList: {
+            ...state.channelVideoList,
+            [channelId]: videos
+        }
+    })),
 }));

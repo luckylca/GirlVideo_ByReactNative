@@ -64,6 +64,36 @@ export const createDouyinResolver = (rawText: string) => {
             }
 
             return null;
+        },
+
+        /**
+         * 从页面HTML中提取用户名称
+         * @param html 页面HTML内容
+         * @returns 用户名称，如果未找到返回null
+         */
+        extractUserNameFromHtml: (html: string): string | null => {
+            // 尝试多种方式提取用户名称
+
+            // 方式1: 从meta标签中提取
+            const metaMatch = html.match(/<meta[^>]*property="og:title"[^>]*content="([^"]+)"/i);
+            if (metaMatch && metaMatch[1]) {
+                return metaMatch[1];
+            }
+
+            // 方式2: 从title标签中提取
+            const titleMatch = html.match(/<title>([^<]+)<\/title>/i);
+            if (titleMatch && titleMatch[1]) {
+                // 移除可能的后缀（如"的抖音"）
+                return titleMatch[1].replace(/的抖音.*$/, '').trim();
+            }
+
+            // 方式3: 从JSON数据中提取
+            const jsonMatch = html.match(/"nickname"\s*:\s*"([^"]+)"/);
+            if (jsonMatch && jsonMatch[1]) {
+                return jsonMatch[1];
+            }
+
+            return null;
         }
     };
 };
